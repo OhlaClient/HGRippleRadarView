@@ -224,7 +224,7 @@ final public class RadarView: RippleView {
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
         guard let point = touch?.location(in: self) else { return }
-        guard let index = itemsViews.index(where: {
+        guard let index = itemsViews.firstIndex(where: {
             return $0.view.frame.contains(point)
         }) else {
             currentItemView = nil
@@ -236,7 +236,7 @@ final public class RadarView: RippleView {
         currentItemView = item
         
         let itemView = item.view
-        self.bringSubview(toFront: itemView)
+        self.bringSubviewToFront(itemView)
         let animation = Animation.opacity(from: 0.3, to: 1.0)
         itemView.layer.add(animation, forKey: "opacity")
     }
@@ -288,7 +288,7 @@ extension RadarView {
     ///
     /// - Parameter item: the item to remove from Radar View
     public func remove(item: Item) {
-        guard let index = itemsViews.index(where: { $0.item.uniqueKey == item.uniqueKey }) else {
+        guard let index = itemsViews.firstIndex(where: { $0.item.uniqueKey == item.uniqueKey }) else {
             print("\(String(describing: item.uniqueKey)) not found")
             return
         }
@@ -302,7 +302,7 @@ extension RadarView {
     /// - Parameter item: the item
     /// - Returns: the layer of the item with the index
     public func view(for item: Item) -> UIView? {
-        guard let index = itemsViews.index(where: { $0.item === item }) else { return nil }
+        guard let index = itemsViews.firstIndex(where: { $0.item === item }) else { return nil }
         return itemsViews[index].view
     }
 }
