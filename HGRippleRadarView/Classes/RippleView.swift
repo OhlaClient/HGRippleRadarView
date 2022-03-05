@@ -24,7 +24,7 @@ public class RippleView: UIView {
     
     /// The duration to animate the central disk
     private var centerAnimationDuration: CFTimeInterval {
-        return CFTimeInterval(animationDuration) * 0.90
+        return CFTimeInterval(animationDuration)
     }
     
     /// The duration to animate one circle
@@ -230,7 +230,7 @@ public class RippleView: UIView {
     
     // MARK: Animation methods
     
-    /// Add animation to central disk and the surrounding circles 
+    /// Add animation to central disk and the surrounding circles
     private func animateSublayers() {
         animateCentralDisk()
         animateCircles()
@@ -268,9 +268,8 @@ extension RippleView {
         layer.removeAllAnimations()
         circlesAnimationTimer?.invalidate()
         diskAnimationTimer?.invalidate()
-        let timeInterval = CFTimeInterval(animationDuration) + circleAnimationDuration
-        circlesAnimationTimer =  Timer.scheduledTimer(timeInterval: timeInterval, target: self, selector: #selector(animateCircles), userInfo: nil, repeats: true)
-        diskAnimationTimer = Timer.scheduledTimer(timeInterval: timeInterval, target: self, selector: #selector(animateCentralDisk), userInfo: nil, repeats: true)
+        circlesAnimationTimer =  Timer.scheduledTimer(timeInterval: CFTimeInterval(circleAnimationDuration), target: self, selector: #selector(animateCircles), userInfo: nil, repeats: true)
+        diskAnimationTimer = Timer.scheduledTimer(timeInterval: CFTimeInterval(centerAnimationDuration), target: self, selector: #selector(animateCentralDisk), userInfo: nil, repeats: true)
     }
     
     /// Stop the ripple animation
