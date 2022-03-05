@@ -126,7 +126,7 @@ extension Visualizer {
         return nil
     }
     
-    open func handleEvent(_ event: UIEvent) {
+    public func handleEvent(_ event: UIEvent) {
         if event.type != .touches {
             return
         }
@@ -174,6 +174,8 @@ extension Visualizer {
                 }
                 
                 log(touch)
+            default:
+                break
             }
         }
     }
@@ -207,6 +209,7 @@ extension Visualizer {
             case .stationary: phase = "S"
             case .ended: phase = "E"
             case .cancelled: phase = "C"
+            default: break
             }
             
             let x = String(format: "%.02f", view.center.x)
@@ -220,7 +223,7 @@ extension Visualizer {
         
         for viewLog in viewLogs {
             
-            if (viewLog["index"]!).characters.count == 0 {
+            if (viewLog["index"]!).count == 0 {
                 continue
             }
             

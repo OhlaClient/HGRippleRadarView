@@ -70,9 +70,8 @@ public struct Animation {
         transformAnimation.duration = duration
         transformAnimation.values = transformValues
         transformAnimation.keyTimes = times
-        transformAnimation.fillMode = .forwards
+        transformAnimation.fillMode = CAMediaTimingFillMode.forwards
         transformAnimation.isRemovedOnCompletion = false
-        
         return transformAnimation
     }
     

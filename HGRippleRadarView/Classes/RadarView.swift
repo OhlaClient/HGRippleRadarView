@@ -236,7 +236,7 @@ final public class RadarView: RippleView {
         currentItemView = item
         
         let itemView = item.view
-        self.bringSubviewToFront(itemView)
+        self.bringSubview(toFront: itemView)
         let animation = Animation.opacity(from: 0.3, to: 1.0)
         itemView.layer.add(animation, forKey: "opacity")
     }
