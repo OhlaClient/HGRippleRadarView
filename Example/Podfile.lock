@@ -15,7 +15,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  HGRippleRadarView: 3d9c5cb3f45ef75b950cc48b3f97186fb73a8f37
+  HGRippleRadarView: 86186e5568ccd2d89dc0bd58eb10046e33bbbb3c
   TouchVisualizer: 5cb21ff505c4e60166fe0c8e84a82e5d9ee9e64c
 
 PODFILE CHECKSUM: 8fd59589cc5de491af0fe0a1c17ac7108545b1b3
