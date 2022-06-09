@@ -19,6 +19,8 @@ public class RippleView: UIView {
     /// the center circle used for the scale animation
     private var centerAnimatedLayer: CAShapeLayer!
     
+    private var centerAnimatedLayer2: CAShapeLayer!
+    
     /// the center disk point
     private var diskLayer: CAShapeLayer!
     
@@ -77,9 +79,48 @@ public class RippleView: UIView {
     @IBInspectable public var diskColor: UIColor = .ripplePink {
         didSet {
             diskLayer.fillColor = diskColor.cgColor
-            centerAnimatedLayer.fillColor = diskColor.cgColor
         }
     }
+    
+    @IBInspectable public var diskStrokeColor: UIColor = .ripplePink {
+        didSet {
+            diskLayer.strokeColor = diskStrokeColor.cgColor
+        }
+    }
+    
+    @IBInspectable public var diskStrokWidth: CGFloat = 1 {
+        didSet {
+            diskLayer.lineWidth = diskStrokWidth
+        }
+    }
+    
+    @IBInspectable public var centerAnimatedColor: UIColor = .ripplePink {
+        didSet {
+            centerAnimatedLayer.fillColor = centerAnimatedColor.cgColor
+            centerAnimatedLayer2.fillColor = centerAnimatedColor.cgColor
+        }
+    }
+    
+    @IBInspectable public var centerAnimatedStrokeColor: UIColor = .clear {
+        didSet {
+            centerAnimatedLayer.strokeColor = centerAnimatedStrokeColor.cgColor
+            centerAnimatedLayer2.strokeColor = centerAnimatedStrokeColor.cgColor
+        }
+    }
+    
+    @IBInspectable public var centerAnimatedStrokeWidth: CGFloat = 1 {
+        didSet {
+            centerAnimatedLayer.lineWidth = centerAnimatedStrokeWidth
+            centerAnimatedLayer2.lineWidth = centerAnimatedStrokeWidth
+        }
+    }
+    
+    public enum CenterAnimatedStyle {
+        case alternate
+        case zoom
+    }
+    
+    public var centerAnimatedStyle: CenterAnimatedStyle = .alternate
     
     /// The number of circles to draw around the disk, the default value is 3, if the forcedMaximumCircleRadius is used the number of drawn circles could be less than numberOfCircles
     @IBInspectable public var numberOfCircles: Int = 3 {
@@ -175,6 +216,7 @@ public class RippleView: UIView {
         
         diskLayer.position = bounds.center
         centerAnimatedLayer.position = bounds.center
+        centerAnimatedLayer2.position = bounds.center
         circlesLayer.forEach {
             $0.position = bounds.center
         }
@@ -182,30 +224,39 @@ public class RippleView: UIView {
     
     /// Draws disks and circles
     private func drawSublayers() {
-       drawDisks()
-       redrawCircles()
+        drawDisks()
+        redrawCircles()
     }
     
     /// Draw central disk and the disk for the central animation
     private func drawDisks() {
         diskLayer = Drawer.diskLayer(radius: diskRadius, origin: bounds.center, color: diskColor.cgColor)
+        diskLayer.strokeColor = diskStrokeColor.cgColor
+        diskLayer.lineWidth = diskStrokWidth
         layer.insertSublayer(diskLayer, at: 0)
         
-        centerAnimatedLayer = Drawer.diskLayer(radius: diskRadius, origin: bounds.center, color: diskColor.cgColor)
-        centerAnimatedLayer.opacity = 0.3
+        centerAnimatedLayer = Drawer.diskLayer(radius: diskRadius, origin: bounds.center, color: centerAnimatedColor.cgColor)
+        centerAnimatedLayer.strokeColor = centerAnimatedStrokeColor.cgColor
+        centerAnimatedLayer.lineWidth = centerAnimatedStrokeWidth
         layer.addSublayer(centerAnimatedLayer)
+        
+        centerAnimatedLayer2 = Drawer.diskLayer(radius: diskRadius, origin: bounds.center, color: centerAnimatedColor.cgColor)
+        centerAnimatedLayer2.strokeColor = centerAnimatedStrokeColor.cgColor
+        centerAnimatedLayer2.lineWidth = centerAnimatedStrokeWidth
+        layer.addSublayer(centerAnimatedLayer2)
     }
     
     /// Redraws disks by deleting the old ones and drawing a new ones, called for example when the radius changed
     private func redrawDisks() {
         diskLayer.removeFromSuperlayer()
         centerAnimatedLayer.removeFromSuperlayer()
+        centerAnimatedLayer2.removeFromSuperlayer()
         
         drawDisks()
     }
-
+    
     /// Redraws circles by deleting old ones and drawing new ones, this method is called, for example, when the number of circles changed
-     func redrawCircles() {
+    func redrawCircles() {
         circlesLayer.forEach {
             $0.removeFromSuperlayer()
         }
@@ -240,12 +291,34 @@ public class RippleView: UIView {
     
     /// Animates the central disk by changing the opacitiy and the scale
     @objc private func animateCentralDisk() {
-        let maxScale = maxCircleRadius / diskRadius
-        let scaleAnimation = Animation.transform(to: maxScale)
-        let alphaAnimation = Animation.opacity(from: 0.3, to: 0.0)
-        let groupAnimation = Animation.group(animations: scaleAnimation, alphaAnimation, duration: centerAnimationDuration)
-        centerAnimatedLayer.add(groupAnimation, forKey: nil)
-        self.layer.addSublayer(centerAnimatedLayer)
+        func animateLayer1() {
+            let maxScale = maxCircleRadius / diskRadius
+            let scaleAnimation = Animation.transform(to: maxScale)
+            let alphaAnimation = Animation.opacity(from: 1, to: 0.0)
+            let groupAnimation = Animation.group(animations: scaleAnimation, alphaAnimation, duration: centerAnimationDuration)
+            centerAnimatedLayer.add(groupAnimation, forKey: nil)
+            self.layer.addSublayer(centerAnimatedLayer)
+        }
+        func animateLayer2() {
+            let maxScale: CGFloat
+            let delay: CFTimeInterval
+            switch centerAnimatedStyle {
+            case .alternate:
+                maxScale = maxCircleRadius / diskRadius
+                delay = centerAnimationDuration * 0.5
+            case .zoom:
+                maxScale = ((maxCircleRadius - diskRadius) / 2 + diskRadius) / diskRadius
+                delay = 0
+            }
+            let scaleAnimation = Animation.transform(to: maxScale)
+            let alphaAnimation = Animation.opacity(from: 1, to: 0.0)
+            let groupAnimation = Animation.group(animations: scaleAnimation, alphaAnimation, duration: centerAnimationDuration)
+            groupAnimation.beginTime = CACurrentMediaTime() + delay
+            centerAnimatedLayer2.add(groupAnimation, forKey: nil)
+            self.layer.addSublayer(centerAnimatedLayer2)
+        }
+        animateLayer1()
+        animateLayer2()
     }
     
     /// Animates circles by changing color from off to on color
